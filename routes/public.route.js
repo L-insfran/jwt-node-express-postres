@@ -1,4 +1,4 @@
-import {Router} from 'express'
+import { Router } from 'express'
 import path from 'path'
 
 const router = Router()
@@ -12,6 +12,9 @@ router.get('/login',(req, res)=>{
 })
 router.get('/profile',(req, res)=>{
   res.sendFile(publicPath + "/profile.html")
+})
+router.get('/admin',(req, res)=>{
+  res.sendFile(publicPath + "/admin.html")
 })
 
 export default router

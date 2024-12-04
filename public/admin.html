@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel</title>
+</head>
+<body>
+  <h1>Admin panel</h1>
+  <button id="logout"> Logout</button>
+  
+  <h2>Vet users</h2>
+  <ul id="clientVet"></ul>
+
+  <h2>Client users</h2>
+  <ul id="clientUsers"></ul>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    const logout = document.querySelector('#logout')
+    const token = localStorage.getItem('token')
+    
+    const clientVets = document.querySelector('#clientVet')
+    const clientUsers = document.querySelector('#clientUsers')
+
+
+    if(!token){
+      window.location.href="/login"
+    }
+
+    logout.addEventListener('click', ()=>{
+      localStorage.removeItem('token')
+      window.location.href = "/login"
+    })
+
+    axios.get('/api/v1/users/',{
+      headers:{
+        Authorization: `Bearer ${token}`
+      }
+    })
+    .then(({data})=>{
+      const {msg:users} = data
+      
+      users.forEach(user => {
+        if(user.role_id === 1) return
+        const li = document.createElement('li')
+        li.textContent = user.username
+
+        if (user.role_id === 3){
+            const button = document.createElement('button')
+
+            button.textContent= "promote to vet"
+            button.addEventListener('click', async()=>{
+              if(!confirm('Are you sure your want to promote this user to Vet')){
+                return
+              }
+              try {
+                const { data } = axios.put(`/api/v1/users/update-role-vet/${user.uid}`, {}, {
+                    headers: {
+                      Authorization: `Bearer ${token}`
+                    }
+                })
+              
+                window.location.reload()
+              } catch (error) {
+                console.log(error)
+              }
+            })
+            li.appendChild(button)
+
+            clientUsers.appendChild(li)
+            return
+        }
+        clientVets.appendChild(li)
+
+      });
+
+    })
+    .catch(e =>console.log(e))
+  </script>
+</body>
+</html>
